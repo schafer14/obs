@@ -19,11 +19,11 @@ type NewObservation struct {
 	ObservationLocation *geojson.Geometry `json:"observationLocation,omitempty" validate:"-"`
 
 	// Type data about the observation
-	Feature      Feature      `json:"feature" validate:"required,dive"`
-	FeatureType  FeatureType  `json:"featureType" validate:"required,dive"`
-	Property     Property     `json:"property" validate:"required,dive"`
-	PropertyType PropertyType `json:"propertyType" validate:"required,dive"`
-	Process      Process      `json:"process" validate:"required,dive"`
+	Feature      *Feature      `json:"feature" validate:"required,dive"`
+	FeatureType  *FeatureType  `json:"featureType" validate:"required,dive"`
+	Property     *Property     `json:"property" validate:"required,dive"`
+	PropertyType *PropertyType `json:"propertyType" validate:"required,dive"`
+	Process      *Process      `json:"process" validate:"required,dive"`
 
 	Tags    map[string]string `json:"tags,omitempty" validate:"-"`
 	Context []string          `json:"context,omitempty" validate:"-"`
@@ -46,11 +46,11 @@ type Observation struct {
 	ObservationLocation *geojson.Geometry `json:"observationLocation"`
 
 	// Type data about the observation
-	Feature      Feature      `json:"feature"`
-	FeatureType  FeatureType  `json:"featureType"`
-	Property     Property     `json:"property"`
-	PropertyType PropertyType `json:"propertyType"`
-	Process      Process      `json:"process"`
+	Feature      *Feature      `json:"feature"`
+	FeatureType  *FeatureType  `json:"featureType"`
+	Property     *Property     `json:"property"`
+	PropertyType *PropertyType `json:"propertyType"`
+	Process      *Process      `json:"process"`
 
 	Tags    map[string]string `json:"tags"`
 	Context []string          `json:"context"`
