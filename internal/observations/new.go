@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"cloud.google.com/go/firestore"
+	"github.com/pkg/errors"
 	"gopkg.in/go-playground/validator.v9"
 )
 
@@ -69,10 +70,26 @@ func New(newObs NewObservation, id string, now time.Time) (Observation, error) {
 // Save persists an Observation to the database. It expects that the observation
 // has been initiated with New and is not a Observation literal.
 func Save(ctx context.Context, collection *firestore.CollectionRef, obs Observation) error {
-	panic("not implemented")
+	_, err := collection.Doc(obs.ID).Set(ctx, obs)
+
+	if err != nil {
+		return errors.Wrap(err, "saving observation")
+	}
+
+	return nil
 }
 
 // Find retrieves a single observation from the database based on the observation id.
 func Find(ctx context.Context, collection *firestore.CollectionRef, id string) (Observation, error) {
-	panic("not implemented")
+	docsnap, err := collection.Doc(id).Get(ctx)
+	if err != nil {
+		return Observation{}, errors.Wrap(err, "fetching observation")
+	}
+
+	var obs Observation
+	if err := docsnap.DataTo(&obs); err != nil {
+		return Observation{}, errors.Wrap(err, "parsing docsnap to observation")
+	}
+
+	return obs, nil
 }

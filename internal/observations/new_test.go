@@ -126,7 +126,7 @@ func TestSavingAnObservation(t *testing.T) {
 	assert.Equal(t, newObs.ID, obs.ID, "observation id not saved correctly")
 	assert.Equal(t, newObs.Feature, obs.Feature, "observation feature not saved correctly")
 	assert.Equal(t, newObs.Result, obs.Result, "observation result not saved correctly")
-	assert.WithinDuration(t, newObs.ResultTime, obs.ResultTime, time.Nanosecond, "observation result time not saved correctly")
+	assert.WithinDuration(t, newObs.ResultTime, obs.ResultTime, time.Microsecond, "observation result time not saved correctly")
 }
 
 // ===========================================
@@ -169,10 +169,10 @@ func mkObs() observations.NewObservation {
 			ID:    "urn:example:measurement:by-eye",
 			Label: "Walk of garden",
 		},
-		Result: map[string]int{
-			"wisteria": 5,
-			"citrus":   4,
-			"magnolia": 3,
+		Result: map[string]interface{}{
+			"wisteria": int64(5),
+			"citrus":   int64(4),
+			"magnolia": int64(3),
 		},
 	}
 }
