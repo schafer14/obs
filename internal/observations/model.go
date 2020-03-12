@@ -19,11 +19,11 @@ type NewObservation struct {
 	ObservationLocation *geojson.Geometry `json:"observationLocation,omitempty" validate:"-"`
 
 	// Type data about the observation
-	Feature      Feature      `json:"feature" validate:"required,dive"`
-	FeatureType  FeatureType  `json:"featureType" validate:"required,dive"`
-	Property     Property     `json:"property" validate:"required,dive"`
-	PropertyType PropertyType `json:"propertyType" validate:"required,dive"`
-	Process      Process      `json:"process" validate:"required,dive"`
+	Feature      Referenceable `json:"feature" validate:"required,dive"`
+	FeatureType  Referenceable `json:"featureType" validate:"required,dive"`
+	Property     Referenceable `json:"property" validate:"required,dive"`
+	PropertyType Referenceable `json:"propertyType" validate:"required,dive"`
+	Process      Referenceable `json:"process" validate:"required,dive"`
 
 	Tags    map[string]string `json:"tags,omitempty" validate:"-"`
 	Context []string          `json:"context,omitempty" validate:"-"`
@@ -39,64 +39,40 @@ type Observation struct {
 	ID string `json:"id"`
 
 	// Metadata about the observation
-	PhenomenonTime      time.Time         `json:"phenomenonTime"`
-	ResultTime          time.Time         `json:"resultTime"`
-	ValidInterval       Interval          `json:"validInterval"`
-	PhenomenonLocation  *geojson.Geometry `json:"phenomenonLocation"`
-	ObservationLocation *geojson.Geometry `json:"observationLocation"`
+	PhenomenonTime      time.Time         `json:"phenomenonTime" firestore="phenomenonTime"`
+	ResultTime          time.Time         `json:"resultTime" firestore="resultTime"`
+	ValidInterval       Interval          `json:"validInterval" firestore="validInterval"`
+	PhenomenonLocation  *geojson.Geometry `json:"phenomenonLocation" firestore="phenomenonLocation"`
+	ObservationLocation *geojson.Geometry `json:"observationLocation" firestore="observationLocation"`
 
 	// Type data about the observation
-	Feature      Feature      `json:"feature"`
-	FeatureType  FeatureType  `json:"featureType"`
-	Property     Property     `json:"property"`
-	PropertyType PropertyType `json:"propertyType"`
-	Process      Process      `json:"process"`
+	Feature      Referenceable `json:"feature" firestore="feature"`
+	FeatureType  Referenceable `json:"featureType" firestore="featureType"`
+	Property     Referenceable `json:"property" firestore="property"`
+	PropertyType Referenceable `json:"propertyType" firestore="propertyType"`
+	Process      Referenceable `json:"process" firestore="process"`
 
-	Tags    map[string]string `json:"tags"`
-	Context []string          `json:"context"`
+	// Additional fields for indexing and querying
+	FeatureID      string `json:"-" firestore="featureId"`
+	FeatureTypeID  string `json:"-" firestore="featureTypeId"`
+	PropertyID     string `json:"-" firestore="propertyId"`
+	PropertyTypeID string `json:"-" firestore="propertyTypeId`
+	ProcessID      string `json:"-" firestore="processId"`
 
-	Result interface{} `json:"result"`
-	Scale  string      `json:"scale"`
+	Tags    map[string]string `json:"tags" firestore="tags"`
+	Context []string          `json:"context" firestore="context"`
+
+	Result interface{} `json:"result" firestore="result"`
+	Scale  string      `json:"scale" firestore="scale"`
 }
 
-// Feature is the entity being observed.
-type Feature struct {
-	ID          string `json:"id" validate:"required,uuid|uri"`
-	Label       string `json:"label,omitempty" validate:"omitempty"`
-	Description string `json:"description,omitempty" validate:"omitempty"`
-	Reference   string `json:"reference,omitempty" validate:"omitempty,uri"`
-}
-
-// FeatureType is the type of the entity being observed.
-type FeatureType struct {
-	ID          string `json:"id" validate:"required,uuid|uri"`
-	Label       string `json:"label,omitempty" validate:"omitempty"`
-	Description string `json:"description,omitempty" validate:"omitempty"`
-	Reference   string `json:"reference,omitempty" validate:"omitempty,uri"`
-}
-
-// Property is the attribute of the feature that is being observed.
-type Property struct {
-	ID          string `json:"id" validate:"required,uuid|uri"`
-	Label       string `json:"label,omitempty" validate:"omitempty"`
-	Description string `json:"description,omitempty" validate:"omitempty"`
-	Reference   string `json:"reference,omitempty" validate:"omitempty,uri"`
-}
-
-// PropertyType is the type of the attribute being observed.
-type PropertyType struct {
-	ID          string `json:"id" validate:"required,uuid|uri"`
-	Label       string `json:"label,omitempty" validate:"omitempty"`
-	Description string `json:"description,omitempty" validate:"omitempty"`
-	Reference   string `json:"reference,omitempty" validate:"omitempty,uri"`
-}
-
-// Process is the method that was used to make the observation.
-type Process struct {
-	ID          string `json:"id" validate:"required,uuid|uri"`
-	Label       string `json:"label,omitempty" validate:"omitempty"`
-	Description string `json:"description,omitempty" validate:"omitempty"`
-	Reference   string `json:"reference,omitempty" validate:"omitempty,uri"`
+// Referenceable field is a field that can be looked up with an ID and additionally has a human
+// readable label and reference to an external url.
+type Referenceable struct {
+	ID          string `json:"id" validate:"required,uuid|uri" firestore="id"`
+	Label       string `json:"label,omitempty" validate:"omitempty" firestore="label"`
+	Description string `json:"description,omitempty" validate:"omitempty" firestore="description"`
+	Reference   string `json:"reference,omitempty" validate:"omitempty,uri" firestore="reference"`
 }
 
 // Interval is a period of a time with a start time and a duration.

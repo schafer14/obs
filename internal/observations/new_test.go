@@ -1,9 +1,11 @@
 package observations_test
 
 import (
+	"context"
 	"testing"
 	"time"
 
+	"cloud.google.com/go/firestore"
 	"github.com/google/uuid"
 	geojson "github.com/paulmach/go.geojson"
 	"github.com/schafer14/observations/internal/observations"
@@ -36,6 +38,12 @@ func TestNewObservationWithRequiredFields(t *testing.T) {
 	assert.Equal(t, newObs.PropertyType, obs.PropertyType, "invalid property type")
 	assert.Equal(t, newObs.Process, obs.Process, "invalid process")
 
+	assert.Equal(t, newObs.Feature.ID, obs.FeatureID, "invalid feature id")
+	assert.Equal(t, newObs.FeatureType.ID, obs.FeatureTypeID, "invalid feature type id")
+	assert.Equal(t, newObs.Property.ID, obs.PropertyID, "invalid property id")
+	assert.Equal(t, newObs.PropertyType.ID, obs.PropertyTypeID, "invalid property id type")
+	assert.Equal(t, newObs.Process.ID, obs.ProcessID, "invalid process id")
+
 	assert.Equal(t, newObs.Result, obs.Result, "invalid result")
 }
 
@@ -59,7 +67,7 @@ func TestOptionalParamsMaybeProvided(t *testing.T) {
 	newObs := mkObs()
 	now := time.Now()
 	id := uuid.New().String()
-	newObs.Process = observations.Process{ID: "https://example.com/process", Label: "Process"}
+	newObs.Process = observations.Referenceable{ID: "https://example.com/process", Label: "Process"}
 	newObs.Context = []string{"These are my contexts", "They are okay"}
 	newObs.Tags = map[string]string{"isCool": "true", "observed by": "Banner"}
 	newObs.Scale = "inches"
@@ -96,27 +104,68 @@ func TestObservationWithGeoJson(t *testing.T) {
 	assert.Equal(t, newObs.ObservationLocation, obs.ObservationLocation, "process label invalid")
 }
 
+func TestSavingAnObservation(t *testing.T) {
+
+	if testing.Short() {
+		t.Skip()
+	}
+
+	// Arrage
+	ctx := context.Background()
+	id := uuid.New().String()
+	now := time.Now()
+	newObs, err := observations.New(mkObs(), id, now)
+	require.Nil(t, err, "creating new observation")
+
+	// Act
+	err = observations.Save(ctx, coll, newObs)
+
+	// Assert
+	require.Nil(t, err, "creating observation")
+	obs := fetchObs(t, ctx, coll, newObs.ID)
+	assert.Equal(t, newObs.ID, obs.ID, "observation id not saved correctly")
+	assert.Equal(t, newObs.Feature, obs.Feature, "observation feature not saved correctly")
+	assert.Equal(t, newObs.Result, obs.Result, "observation result not saved correctly")
+	assert.WithinDuration(t, newObs.ResultTime, obs.ResultTime, time.Nanosecond, "observation result time not saved correctly")
+}
+
+// ===========================================
+// Test Fixtures
+// ===========================================
+
+// fetchObs is a wrapper around the find function. It simply allows a one
+// line executaiton of Find to ensure tests are more readable.
+func fetchObs(t *testing.T, ctx context.Context, coll *firestore.CollectionRef, id string) observations.Observation {
+
+	// Identify this a test helper.
+	t.Helper()
+
+	obs, err := observations.Find(ctx, coll, id)
+	require.Nil(t, err, "fetching observation")
+	return obs
+}
+
 // mkObs is a text fixture. It creates a NewObservation
 // with some hard coded data.
 func mkObs() observations.NewObservation {
 	return observations.NewObservation{
-		Feature: observations.Feature{
+		Feature: observations.Referenceable{
 			ID:    "https://example.com/banners-garden",
 			Label: "Banner's Garden",
 		},
-		FeatureType: observations.FeatureType{
+		FeatureType: observations.Referenceable{
 			ID:    "urn:example:garden",
 			Label: "Garden",
 		},
-		Property: observations.Property{
+		Property: observations.Referenceable{
 			ID:    "urn:example:health",
 			Label: "Health",
 		},
-		PropertyType: observations.PropertyType{
+		PropertyType: observations.Referenceable{
 			ID:    "urn:example:scale-1-5",
 			Label: "Scale 1 - 5",
 		},
-		Process: observations.Process{
+		Process: observations.Referenceable{
 			ID:    "urn:example:measurement:by-eye",
 			Label: "Walk of garden",
 		},

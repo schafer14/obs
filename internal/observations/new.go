@@ -1,8 +1,10 @@
 package observations
 
 import (
+	"context"
 	"time"
 
+	"cloud.google.com/go/firestore"
 	"gopkg.in/go-playground/validator.v9"
 )
 
@@ -48,12 +50,29 @@ func New(newObs NewObservation, id string, now time.Time) (Observation, error) {
 		FeatureType:  newObs.FeatureType,
 		Property:     newObs.Property,
 		PropertyType: newObs.PropertyType,
+		Process:      newObs.Process,
 
-		Process: newObs.Process,
+		FeatureID:      newObs.Feature.ID,
+		FeatureTypeID:  newObs.FeatureType.ID,
+		PropertyID:     newObs.Property.ID,
+		PropertyTypeID: newObs.PropertyType.ID,
+		ProcessID:      newObs.Process.ID,
+
 		Context: newObs.Context,
 		Tags:    newObs.Tags,
 
 		Scale:  newObs.Scale,
 		Result: newObs.Result,
 	}, nil
+}
+
+// Save persists an Observation to the database. It expects that the observation
+// has been initiated with New and is not a Observation literal.
+func Save(ctx context.Context, collection *firestore.CollectionRef, obs Observation) error {
+	panic("not implemented")
+}
+
+// Find retrieves a single observation from the database based on the observation id.
+func Find(ctx context.Context, collection *firestore.CollectionRef, id string) (Observation, error) {
+	panic("not implemented")
 }
