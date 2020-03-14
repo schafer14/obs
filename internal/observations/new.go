@@ -2,10 +2,12 @@ package observations
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"cloud.google.com/go/firestore"
 	"github.com/pkg/errors"
+	"google.golang.org/api/iterator"
 	"gopkg.in/go-playground/validator.v9"
 )
 
@@ -92,4 +94,58 @@ func Find(ctx context.Context, collection *firestore.CollectionRef, id string) (
 	}
 
 	return obs, nil
+}
+
+type Filter struct {
+	Path    string
+	Op      string
+	Matcher string
+}
+
+var filterableFields map[string]string = map[string]string{
+	"featureId": "FeatureID", "featureTypeId": "FeatureTypeID", "propertyId": "PropertyID",
+	"propertyTypeId": "PropertyTypeID", "processId": "ProcessID", "id": "ID",
+}
+
+var queryOps map[string]string = map[string]string{
+	"=": "==", "in": "in",
+}
+
+// Get retrieves a list of observations from the databse.
+func Get(ctx context.Context, collection *firestore.CollectionRef, filters ...Filter) ([]Observation, error) {
+	q := collection.OrderBy("ResultTime", firestore.Desc)
+
+	for _, f := range filters {
+		firestoreField, fok := filterableFields[f.Path]
+		firestoreOp, ook := queryOps[f.Op]
+		if !fok || !ook {
+			return []Observation{}, fmt.Errorf("invalid filter parameter")
+		}
+
+		q = q.Where(firestoreField, firestoreOp, f.Matcher)
+	}
+
+	var observations []Observation
+	iter := q.Documents(ctx)
+	defer iter.Stop()
+	for {
+		doc, err := iter.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			// This could be an indexing error that we (developers) need to know about and add an index
+			// to firestore.
+			fmt.Println(err)
+			return observations, errors.Wrap(err, "fetching document in iteration")
+		}
+
+		var observation Observation
+		if err := doc.DataTo(&observation); err != nil {
+			return observations, errors.Wrap(err, "parsing doc snapshot to observation")
+		}
+		observations = append(observations, observation)
+	}
+
+	return observations, nil
 }

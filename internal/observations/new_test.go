@@ -8,9 +8,11 @@ import (
 	"cloud.google.com/go/firestore"
 	"github.com/google/uuid"
 	geojson "github.com/paulmach/go.geojson"
+	"github.com/pkg/errors"
 	"github.com/schafer14/observations/internal/observations"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"google.golang.org/api/iterator"
 )
 
 func TestNewObservationWithRequiredFields(t *testing.T) {
@@ -129,6 +131,43 @@ func TestSavingAnObservation(t *testing.T) {
 	assert.WithinDuration(t, newObs.ResultTime, obs.ResultTime, time.Microsecond, "observation result time not saved correctly")
 }
 
+func TestGettingObservations(t *testing.T) {
+
+	if testing.Short() {
+		t.Skip()
+	}
+
+	// Arrage
+	ctx := context.Background()
+	err := deleteCollection(ctx, client, coll, 100)
+	require.Nil(t, err, "deleting collection")
+	uuids := ids(2) // Create 2 ids
+	obss := mkObss(5)
+	now := time.Now()
+
+	obss[0].Feature.ID = uuids[0]
+	obss[1].Feature.ID = uuids[0]
+	obss[2].Feature.ID = uuids[0]
+	obss[1].Property.ID = uuids[1]
+	obss[2].Property.ID = uuids[1]
+	obss[4].Property.ID = uuids[1]
+
+	err = saveObss(ctx, obss, now, coll)
+	require.Nil(t, err, "prepping observations")
+
+	// Act
+	newObss, err := observations.Get(
+		ctx,
+		coll,
+		observations.Filter{Path: "featureId", Op: "=", Matcher: uuids[0]},
+		observations.Filter{Path: "propertyId", Op: "=", Matcher: uuids[1]},
+	)
+
+	// Assert
+	require.Nil(t, err, "getting observations")
+	assert.Equal(t, 2, len(newObss), "observation length mismatch")
+}
+
 // ===========================================
 // Test Fixtures
 // ===========================================
@@ -174,5 +213,79 @@ func mkObs() observations.NewObservation {
 			"citrus":   int64(4),
 			"magnolia": int64(3),
 		},
+	}
+}
+
+// mkObss creates n observations.
+func mkObss(n int) []observations.NewObservation {
+	var obss []observations.NewObservation
+	for i := 0; i < n; i++ {
+		obss = append(obss, mkObs())
+	}
+	return obss
+}
+
+// ids creates a list of n uuids in string format.
+func ids(n int) []string {
+	var uuids []string
+	for i := 0; i < n; i++ {
+		uuids = append(uuids, uuid.New().String())
+	}
+	return uuids
+}
+
+// saveObss saves a list of new observations to the datastore
+func saveObss(ctx context.Context, newObservations []observations.NewObservation, now time.Time, coll *firestore.CollectionRef) error {
+	for _, obs := range newObservations {
+		newObs, err := observations.New(obs, uuid.New().String(), now)
+		if err != nil {
+			return errors.Wrap(err, "creating observation")
+		}
+		err = observations.Save(ctx, coll, newObs)
+		if err != nil {
+			return errors.Wrap(err, "saving observation")
+		}
+	}
+
+	return nil
+}
+
+// deleteCollection deletes all the data in a firestore collection.
+// This allows to run integration tests with a fresh set of data.
+func deleteCollection(ctx context.Context, client *firestore.Client,
+	ref *firestore.CollectionRef, batchSize int) error {
+
+	for {
+		// Get a batch of documents
+		iter := ref.Limit(batchSize).Documents(ctx)
+		numDeleted := 0
+
+		// Iterate through the documents, adding
+		// a delete operation for each one to a
+		// WriteBatch.
+		batch := client.Batch()
+		for {
+			doc, err := iter.Next()
+			if err == iterator.Done {
+				break
+			}
+			if err != nil {
+				return err
+			}
+
+			batch.Delete(doc.Ref)
+			numDeleted++
+		}
+
+		// If there are no documents to delete,
+		// the process is over.
+		if numDeleted == 0 {
+			return nil
+		}
+
+		_, err := batch.Commit(ctx)
+		if err != nil {
+			return err
+		}
 	}
 }

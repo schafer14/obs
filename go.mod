@@ -11,6 +11,8 @@ require (
 	github.com/paulmach/go.geojson v1.4.0
 	github.com/pkg/errors v0.8.1
 	github.com/stretchr/testify v1.5.1
+	google.golang.org/api v0.14.0
+	google.golang.org/grpc v1.21.1
 	gopkg.in/go-playground/assert.v1 v1.2.1
 	gopkg.in/go-playground/validator.v9 v9.31.0
 )

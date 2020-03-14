@@ -11,6 +11,7 @@ import (
 )
 
 var coll *firestore.CollectionRef
+var client *firestore.Client
 
 // TestMain prepares the test suite for integration tests.
 // It opens a connection to the database runs the tests and
@@ -18,7 +19,6 @@ var coll *firestore.CollectionRef
 //
 // TODO: run firestore locally for integration tests.
 func TestMain(m *testing.M) {
-	var client *firestore.Client
 	ctx := context.Background()
 
 	var project = flag.String("project", "linked-data-land", "the google project the firestore instance is in.")
@@ -27,7 +27,8 @@ func TestMain(m *testing.M) {
 
 	// Setup
 	if !testing.Short() {
-		client, err := firestore.NewClient(ctx, *project)
+		c, err := firestore.NewClient(ctx, *project)
+		client = c
 		if err != nil {
 			fmt.Printf("connecting to firestore client: %v", err)
 			os.Exit(1)
