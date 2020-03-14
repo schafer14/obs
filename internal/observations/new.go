@@ -97,9 +97,9 @@ func Find(ctx context.Context, collection *firestore.CollectionRef, id string) (
 }
 
 type Filter struct {
-	Path    string
-	Op      string
-	Matcher string
+	Path    string `json:"path"`
+	Op      string `json:"op"`
+	Matcher string `json:"match"`
 }
 
 var filterableFields map[string]string = map[string]string{
