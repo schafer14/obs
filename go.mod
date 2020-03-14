@@ -8,7 +8,8 @@ require (
 	github.com/ardanlabs/conf v1.2.1
 	github.com/go-chi/chi v4.0.3+incompatible
 	github.com/go-chi/docgen v1.0.5
-	github.com/go-playground/universal-translator v0.17.0 // indirect
+	github.com/go-playground/locales v0.13.0
+	github.com/go-playground/universal-translator v0.17.0
 	github.com/google/uuid v1.1.1
 	github.com/leodido/go-urn v1.2.0 // indirect
 	github.com/paulmach/go.geojson v1.4.0

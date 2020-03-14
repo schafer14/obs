@@ -15,8 +15,8 @@ go test ./... -v -project $MY_GCP_PROJECT
 
 TODO:
 
-- [] Better validation errors observations
-- [] Better validation and errors for filters
+- [x] Better validation errors observations
+- [x] Better validation and errors for filters
+- [x] Observation 404 errors
 - [] Authboss stuff
-- [] File uploader
-- [] Observation 404 errors
+- [] API docs and clients

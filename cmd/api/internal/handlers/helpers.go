@@ -5,24 +5,43 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"reflect"
+	"strings"
 
+	en "github.com/go-playground/locales/en"
+	ut "github.com/go-playground/universal-translator"
 	"github.com/pkg/errors"
+	validator "gopkg.in/go-playground/validator.v9"
+	en_translations "gopkg.in/go-playground/validator.v9/translations/en"
 )
 
-// WebError is a type of error that has a field that is safe to
-// return to the client.
-type webError struct {
-	error
+// validate holds the settings and caches for validating request struct values.
+var validate = validator.New()
 
-	message string
-	status  int
-	fields  []interface{}
-}
+// translator is a cache of locale and translation information.
+var translator *ut.UniversalTranslator
 
-// NewWebError creates an error that will have it's message returned to
-// the end user.
-func NewWebError(err error, msg string, status int, fields ...interface{}) webError {
-	return webError{err, msg, status, fields}
+func init() {
+
+	// Instantiate the english locale for the validator library.
+	enLocale := en.New()
+
+	// Create a value using English as the fallback locale (first argument).
+	// Provide one or more arguments for additional supported locales.
+	translator = ut.New(enLocale, enLocale)
+
+	// Register the english error messages for validation errors.
+	lang, _ := translator.GetTranslator("en")
+	en_translations.RegisterDefaultTranslations(validate, lang)
+
+	// Use JSON tag names for errors instead of Go struct names.
+	validate.RegisterTagNameFunc(func(fld reflect.StructField) string {
+		name := strings.SplitN(fld.Tag.Get("json"), ",", 2)[0]
+		if name == "-" {
+			return ""
+		}
+		return name
+	})
 }
 
 // Decode reads the body of an HTTP request looking for a JSON document. The
@@ -31,16 +50,37 @@ func NewWebError(err error, msg string, status int, fields ...interface{}) webEr
 // If the provided value is a struct then it is checked for validation tags.
 func Decode(r *http.Request, val interface{}) error {
 	decoder := json.NewDecoder(r.Body)
-
+	decoder.DisallowUnknownFields()
 	if err := decoder.Decode(val); err != nil {
-		return newRequestError(fmt.Errorf("parsing JSON: %v", err), http.StatusUnprocessableEntity)
+		fmt.Println("xyz", err)
+		return Error{errors.Wrap(err, "decoding request"), http.StatusUnprocessableEntity, []FieldError{}}
+	}
+
+	if err := validate.Struct(val); err != nil {
+
+		// Use a type assertion to get the real error value.
+		verrors, ok := err.(validator.ValidationErrors)
+		if !ok {
+			return err
+		}
+
+		// lang controls the language of the error messages. You could look at the
+		// Accept-Language header if you intend to support multiple languages.
+		lang, _ := translator.GetTranslator("en")
+
+		var fields []FieldError
+		for _, verror := range verrors {
+			field := FieldError{
+				Field: verror.Namespace(),
+				Error: verror.Translate(lang),
+			}
+			fields = append(fields, field)
+		}
+
+		return Error{fmt.Errorf("unable to validate request"), http.StatusUnprocessableEntity, fields}
 	}
 
 	return nil
-}
-
-func newRequestError(err error, status int) error {
-	return NewWebError(err, err.Error(), status)
 }
 
 // RespondError sends an error response back to the client.
@@ -53,12 +93,12 @@ func RespondError(ctx context.Context, w http.ResponseWriter, err error) {
 
 	// If the error was of the type *Error, the handler has
 	// a specific status code and error to return.
-	if webErr, ok := err.(webError); ok {
-		er := respondError{
-			Error:  webErr.message,
-			Fields: webErr.fields,
+	if webErr, ok := err.(Error); ok {
+		e := ErrorResponse{
+			Fields: webErr.Fields,
+			Error:  err.Error(),
 		}
-		Respond(ctx, w, er, webErr.status)
+		Respond(ctx, w, e, webErr.Status)
 		return
 	}
 
@@ -101,4 +141,24 @@ func Respond(ctx context.Context, w http.ResponseWriter, data interface{}, statu
 	}
 
 	return
+}
+
+// FieldError is used to indicate an error with a specific request field.
+type FieldError struct {
+	Field string `json:"field"`
+	Error string `json:"error"`
+}
+
+// ErrorResponse is the form used for API responses from failures in the API.
+type ErrorResponse struct {
+	Error  string       `json:"error"`
+	Fields []FieldError `json:"fields,omitempty"`
+}
+
+// Error is used to pass an error during the request through the
+// application with web specific context.
+type Error struct {
+	error
+	Status int
+	Fields []FieldError
 }

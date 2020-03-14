@@ -8,6 +8,8 @@ import (
 	"cloud.google.com/go/firestore"
 	"github.com/pkg/errors"
 	"google.golang.org/api/iterator"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"gopkg.in/go-playground/validator.v9"
 )
 
@@ -33,7 +35,7 @@ func New(newObs NewObservation, id string, now time.Time) (Observation, error) {
 
 	// Run validation.
 	if err := validate.Struct(&newObs); err != nil {
-		return Observation{}, err
+		return Observation{}, validationError(err)
 	}
 
 	return Observation{
@@ -85,6 +87,9 @@ func Save(ctx context.Context, collection *firestore.CollectionRef, obs Observat
 func Find(ctx context.Context, collection *firestore.CollectionRef, id string) (Observation, error) {
 	docsnap, err := collection.Doc(id).Get(ctx)
 	if err != nil {
+		if status.Code(err) == codes.NotFound {
+			return Observation{}, ErrorNotFound
+		}
 		return Observation{}, errors.Wrap(err, "fetching observation")
 	}
 
@@ -97,9 +102,9 @@ func Find(ctx context.Context, collection *firestore.CollectionRef, id string) (
 }
 
 type Filter struct {
-	Path    string `json:"path"`
-	Op      string `json:"op"`
-	Matcher string `json:"match"`
+	Path    string `json:"path" validate:"required"`
+	Op      string `json:"op" validate:"required"`
+	Matcher string `json:"match" validate:"required"`
 }
 
 var filterableFields map[string]string = map[string]string{

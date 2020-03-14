@@ -29,7 +29,11 @@ func (o *ObservationHandler) Create(w http.ResponseWriter, r *http.Request) {
 	now := time.Now()
 	obs, err := observations.New(newObs, id, now)
 	if err != nil {
-		Respond(ctx, w, "invalid observations", http.StatusUnprocessableEntity)
+		if vError, ok := err.(*observations.ValidationError); ok {
+			Respond(ctx, w, vError, http.StatusUnprocessableEntity)
+			return
+		}
+		RespondError(ctx, w, errors.Wrap(err, "creating new observation"))
 		return
 	}
 
@@ -42,17 +46,21 @@ func (o *ObservationHandler) Create(w http.ResponseWriter, r *http.Request) {
 	Respond(ctx, w, obs, http.StatusCreated)
 }
 
+type Filters struct {
+	Filters []observations.Filter `json:"filters" validate:"omitempty,dive"`
+}
+
 // Get handles an http request for listing observations.
 func (o *ObservationHandler) Get(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	filters := []observations.Filter{}
+	var filters Filters
 	if err := Decode(r, &filters); err != nil && r.ContentLength > 0 {
-		RespondError(ctx, w, errors.Wrap(err, "decoding filters"))
+		RespondError(ctx, w, err)
 		return
 	}
 
-	obs, err := observations.Get(ctx, o.db, filters...)
+	obs, err := observations.Get(ctx, o.db, filters.Filters...)
 	if err != nil {
 		RespondError(ctx, w, errors.Wrap(err, "fetching observations"))
 		return
@@ -73,6 +81,10 @@ func (o *ObservationHandler) Find(w http.ResponseWriter, r *http.Request) {
 
 	obs, err := observations.Find(ctx, o.db, id)
 	if err != nil {
+		if err == observations.ErrorNotFound {
+			Respond(ctx, w, map[string]string{"error": "observation not found"}, http.StatusNotFound)
+			return
+		}
 		RespondError(ctx, w, errors.Wrap(err, "fetching observation"))
 		return
 	}
