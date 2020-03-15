@@ -39,40 +39,40 @@ type Observation struct {
 	ID string `json:"id"`
 
 	// Metadata about the observation
-	PhenomenonTime      time.Time         `json:"phenomenonTime" firestore="phenomenonTime"`
-	ResultTime          time.Time         `json:"resultTime" firestore="resultTime"`
-	ValidInterval       Interval          `json:"validInterval" firestore="validInterval"`
-	PhenomenonLocation  *geojson.Geometry `json:"phenomenonLocation" firestore="phenomenonLocation"`
-	ObservationLocation *geojson.Geometry `json:"observationLocation" firestore="observationLocation"`
+	PhenomenonTime      time.Time         `json:"phenomenonTime"`
+	ResultTime          time.Time         `json:"resultTime"`
+	ValidInterval       Interval          `json:"validInterval"`
+	PhenomenonLocation  *geojson.Geometry `json:"phenomenonLocation"`
+	ObservationLocation *geojson.Geometry `json:"observationLocation"`
 
 	// Type data about the observation
-	Feature      Referenceable `json:"feature" firestore="feature"`
-	FeatureType  Referenceable `json:"featureType" firestore="featureType"`
-	Property     Referenceable `json:"property" firestore="property"`
-	PropertyType Referenceable `json:"propertyType" firestore="propertyType"`
-	Process      Referenceable `json:"process" firestore="process"`
+	Feature      Referenceable `json:"feature"`
+	FeatureType  Referenceable `json:"featureType"`
+	Property     Referenceable `json:"property"`
+	PropertyType Referenceable `json:"propertyType"`
+	Process      Referenceable `json:"process"`
 
 	// Additional fields for indexing and querying
-	FeatureID      string `json:"-" firestore="featureId"`
-	FeatureTypeID  string `json:"-" firestore="featureTypeId"`
-	PropertyID     string `json:"-" firestore="propertyId"`
-	PropertyTypeID string `json:"-" firestore="propertyTypeId`
-	ProcessID      string `json:"-" firestore="processId"`
+	FeatureID      string `json:"-"`
+	FeatureTypeID  string `json:"-"`
+	PropertyID     string `json:"-"`
+	PropertyTypeID string `json:"-"`
+	ProcessID      string `json:"-"`
 
-	Tags    map[string]string `json:"tags" firestore="tags"`
-	Context []string          `json:"context" firestore="context"`
+	Tags    map[string]string `json:"tags"`
+	Context []string          `json:"context"`
 
-	Result interface{} `json:"result" firestore="result"`
-	Scale  string      `json:"scale" firestore="scale"`
+	Result interface{} `json:"result"`
+	Scale  string      `json:"scale"`
 }
 
 // Referenceable field is a field that can be looked up with an ID and additionally has a human
 // readable label and reference to an external url.
 type Referenceable struct {
-	ID          string `json:"id" validate:"required,uuid|uri" firestore="id"`
-	Label       string `json:"label,omitempty" validate:"omitempty" firestore="label"`
-	Description string `json:"description,omitempty" validate:"omitempty" firestore="description"`
-	Reference   string `json:"reference,omitempty" validate:"omitempty,uri" firestore="reference"`
+	ID          string `json:"id" validate:"required,uuid|uri"`
+	Label       string `json:"label,omitempty" validate:"omitempty"`
+	Description string `json:"description,omitempty" validate:"omitempty"`
+	Reference   string `json:"reference,omitempty" validate:"omitempty,uri"`
 }
 
 // Interval is a period of a time with a start time and a duration.

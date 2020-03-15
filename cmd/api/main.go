@@ -32,7 +32,6 @@ func run() error {
 	var cfg struct {
 		APIHost          string `conf:"default:0.0.0.0:3000"`
 		FirestoreProject string `conf:"default:linked-data-land"`
-		WithDocs         bool   `conf:"default:true"`
 	}
 
 	if err := conf.Parse(os.Args[1:], "OBS", &cfg); err != nil {
