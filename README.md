@@ -1,6 +1,6 @@
 # Observations
 
-[![version](https://img.shields.io/badge/version-v1.0.0-success)](https://img.shields.io/badge/version-v1.0.0-success)
+[![version](https://img.shields.io/badge/version-v1.0.1-success)](https://img.shields.io/badge/version-v1.0.1-success)
 
 This is an observation service loosly based on the Observation & Measurement specification and the CSIRO implementation. It makes significant deviations from both the original specification and the CSIRO implementation. 
 

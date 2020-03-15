@@ -42,8 +42,8 @@ type Observation struct {
 	PhenomenonTime      time.Time         `json:"phenomenonTime"`
 	ResultTime          time.Time         `json:"resultTime"`
 	ValidInterval       Interval          `json:"validInterval"`
-	PhenomenonLocation  *geojson.Geometry `json:"phenomenonLocation"`
-	ObservationLocation *geojson.Geometry `json:"observationLocation"`
+	PhenomenonLocation  *geojson.Geometry `json:"phenomenonLocation,omitempty"`
+	ObservationLocation *geojson.Geometry `json:"observationLocation,omitempty"`
 
 	// Type data about the observation
 	Feature      Referenceable `json:"feature"`
@@ -59,11 +59,11 @@ type Observation struct {
 	PropertyTypeID string `json:"-"`
 	ProcessID      string `json:"-"`
 
-	Tags    map[string]string `json:"tags"`
-	Context []string          `json:"context"`
+	Tags    map[string]string `json:"tags,omitempty"`
+	Context []string          `json:"context,omitempty"`
 
 	Result interface{} `json:"result"`
-	Scale  string      `json:"scale"`
+	Scale  string      `json:"scale,omitempty"`
 }
 
 // Referenceable field is a field that can be looked up with an ID and additionally has a human
@@ -78,5 +78,5 @@ type Referenceable struct {
 // Interval is a period of a time with a start time and a duration.
 type Interval struct {
 	StartTime time.Time     `json:"startTime" validate:"-"`
-	Duration  time.Duration `json:"duration" validate:"-"`
+	Duration  time.Duration `json:"duration,omitempty" validate:"-"`
 }
