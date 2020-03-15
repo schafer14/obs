@@ -20,7 +20,7 @@ go run ./cmd/api -firestore-project=$GCP_PROJECT_ID
 
 The public demo comes with no guarentees regarding data longevity. It is meant to explore not API not to record observations.
 
-The public demo is available at: https://linked-data-land.appspot.com/v1/observatoins
+The public demo is available at: https://linked-data-land.appspot.com/v1/observations
 
 ## API Docs
 
@@ -46,9 +46,9 @@ go test ./... -v -project $MY_GCP_PROJECT
 - [x] Better validation errors observations
 - [x] Better validation and errors for filters
 - [x] Observation 404 errors
-- [] Authboss authentication
-- [] Authorization
+- [ ] Authboss authentication
+- [ ] Authorization
 - [x] API docs and clients
-- [] Digital object observations
-- [] Firestore emulator for improved integration testing
-- [] Publish to a message queue when observations are created
+- [ ] Digital object observations
+- [ ] Firestore emulator for improved integration testing
+- [ ] Publish to a message queue when observations are created
