@@ -1,5 +1,14 @@
 package definitions
 
+import (
+	"io"
+
+	"gopkg.in/go-playground/validator.v9"
+)
+
+// validate holds the settings and caches for validating request struct values.
+var validate = validator.New()
+
 var Data = map[string]FeatureType{
 	"people": FeatureType{
 		ID:          "34edda82-0f22-4115-b5cf-406db1330436",
@@ -37,8 +46,34 @@ var Data = map[string]FeatureType{
 				Description: "A personal goal",
 				Category:    "future",
 				PropertyTypes: map[string]PropertyType{
-					"textual":   PropertyType{},
-					"goal-plan": PropertyType{},
+					"textual": PropertyType{
+						ID:          "717988a9-f139-4875-b7d7-ac132d7df75b",
+						Name:        "Textual Goals",
+						Slug:        "textual",
+						Description: "Free form description of a goal.",
+						Validator:   validateTextGoal,
+					},
+					"structured": PropertyType{
+						ID:          "9668ea74-9a7d-4665-8e03-402fb39c1365",
+						Name:        "Structured Goal",
+						Slug:        "structured",
+						Description: "A goal with a series of steps to achieve the goal",
+						Validator:   validateStructuredGoal,
+					},
+					"daily-goals": PropertyType{
+						ID:          "a41e13a9-d4d6-47f5-b3d6-580a0e0e44d1",
+						Name:        "Daily Goals",
+						Slug:        "daily-goal",
+						Description: "A set of goals to accomplish for a given time.",
+						Validator:   validateDailyGoal,
+					},
+					"daily-goals-result": PropertyType{
+						ID:          "71d6330c-0f02-4ee9-85d5-b27dfa45aab7",
+						Name:        "Daily Goals Result",
+						Slug:        "daily-goal-result",
+						Description: "A result of a daily goal.",
+						Validator:   validateDailyGoalResult,
+					},
 				},
 			},
 			// "motivation": Property{},
@@ -98,9 +133,10 @@ type Property struct {
 }
 
 type PropertyType struct {
-	ID          string `json:"id"`
-	Name        string `json:"name"`
-	Version     int    `json:"version"`
-	Slug        string `json:"slug"`
-	Description string `json:"description"`
+	ID          string                               `json:"id"`
+	Name        string                               `json:"name"`
+	Version     int                                  `json:"version"`
+	Slug        string                               `json:"slug"`
+	Description string                               `json:"description"`
+	Validator   func(io.Reader) (interface{}, error) `json:"-"`
 }

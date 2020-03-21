@@ -3,6 +3,7 @@ package handlers
 import (
 	"net/http"
 
+	"github.com/go-chi/chi"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"github.com/schafer14/observations/internal/observations"
@@ -11,8 +12,7 @@ import (
 )
 
 type PersonHandler struct {
-	personCollection      *mongo.Collection
-	observationCollection *mongo.Collection
+	personCollection *mongo.Collection
 }
 
 func (p *PersonHandler) Create(w http.ResponseWriter, r *http.Request) {
@@ -42,4 +42,40 @@ func (p *PersonHandler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	Respond(ctx, w, person, http.StatusCreated)
+}
+
+// Get handles an http request for listing observations.
+func (p *PersonHandler) Get(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	persons, err := people.Get(ctx, p.personCollection)
+	if err != nil {
+		RespondError(ctx, w, errors.Wrap(err, "fetching people"))
+		return
+	}
+
+	if persons == nil {
+		persons = []people.Person{}
+	}
+
+	Respond(ctx, w, persons, http.StatusOK)
+}
+
+// Find handles an http request for finding a single observation.
+func (p *PersonHandler) Find(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	id := chi.URLParam(r, "id")
+
+	person, err := people.Find(ctx, p.personCollection, id)
+	if err != nil {
+		if err == observations.ErrorNotFound {
+			Respond(ctx, w, map[string]string{"error": "person not found"}, http.StatusNotFound)
+			return
+		}
+		RespondError(ctx, w, errors.Wrap(err, "fetching person"))
+		return
+	}
+
+	Respond(ctx, w, person, http.StatusOK)
 }

@@ -38,7 +38,7 @@ func API(build string, db *mongo.Database, ab *authboss.Authboss, cfg Collection
 	authHandler := AuthHandler{ab}
 	checkHandler := Check{build, db}
 	oHandler := &ObservationHandler{obsColl}
-	personHandler := &PersonHandler{personColl, obsColl}
+	personHandler := &PersonHandler{personColl}
 
 	// ======================================
 	// Protected routes
@@ -62,6 +62,11 @@ func API(build string, db *mongo.Database, ab *authboss.Authboss, cfg Collection
 		// Person router
 		r.Route("/v1/people", func(r chi.Router) {
 			r.Post("/", personHandler.Create)
+			r.Get("/{id}", personHandler.Find)
+			r.Get("/", personHandler.Get)
+
+			// observations
+			r.Post("/{id}/{propertySlug}/{propertyTypeSlug}", oHandler.Generic("people"))
 		})
 	})
 
