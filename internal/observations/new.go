@@ -2,14 +2,13 @@ package observations
 
 import (
 	"context"
-	"fmt"
 	"time"
 
-	"cloud.google.com/go/firestore"
 	"github.com/pkg/errors"
-	"google.golang.org/api/iterator"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"gopkg.in/go-playground/validator.v9"
 )
 
@@ -17,7 +16,7 @@ import (
 var validate = validator.New()
 
 // New creates a new Observation from a NewObservation
-func New(newObs NewObservation, id string, now time.Time) (Observation, error) {
+func New(newObs NewObservation, id primitive.ObjectID, now time.Time) (Observation, error) {
 	phenomenonTime, startTime, resultTime := now, now, now
 
 	// Set times to now if they are not provided.
@@ -73,8 +72,11 @@ func New(newObs NewObservation, id string, now time.Time) (Observation, error) {
 
 // Save persists an Observation to the database. It expects that the observation
 // has been initiated with New and is not a Observation literal.
-func Save(ctx context.Context, collection *firestore.CollectionRef, obs Observation) error {
-	_, err := collection.Doc(obs.ID).Set(ctx, obs)
+func Save(ctx context.Context, collection *mongo.Collection, obs Observation) error {
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+
+	_, err := collection.InsertOne(ctx, obs)
 
 	if err != nil {
 		return errors.Wrap(err, "saving observation")
@@ -84,18 +86,19 @@ func Save(ctx context.Context, collection *firestore.CollectionRef, obs Observat
 }
 
 // Find retrieves a single observation from the database based on the observation id.
-func Find(ctx context.Context, collection *firestore.CollectionRef, id string) (Observation, error) {
-	docsnap, err := collection.Doc(id).Get(ctx)
+func Find(ctx context.Context, collection *mongo.Collection, id string) (Observation, error) {
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+
+	oid, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		if status.Code(err) == codes.NotFound {
-			return Observation{}, ErrorNotFound
-		}
-		return Observation{}, errors.Wrap(err, "fetching observation")
+		return Observation{}, errors.Wrap(err, "parsing id")
 	}
 
 	var obs Observation
-	if err := docsnap.DataTo(&obs); err != nil {
-		return Observation{}, errors.Wrap(err, "parsing docsnap to observation")
+	err = collection.FindOne(ctx, bson.D{{"_id", oid}}).Decode(&obs)
+	if err != nil {
+		return obs, errors.Wrap(err, "finding observation")
 	}
 
 	return obs, nil
@@ -117,39 +120,17 @@ var queryOps map[string]string = map[string]string{
 }
 
 // Get retrieves a list of observations from the databse.
-func Get(ctx context.Context, collection *firestore.CollectionRef, filters ...Filter) ([]Observation, error) {
-	q := collection.OrderBy("ResultTime", firestore.Desc)
-
-	for _, f := range filters {
-		firestoreField, fok := filterableFields[f.Path]
-		firestoreOp, ook := queryOps[f.Op]
-		if !fok || !ook {
-			return []Observation{}, fmt.Errorf("invalid filter parameter")
-		}
-
-		q = q.Where(firestoreField, firestoreOp, f.Matcher)
-	}
+func Get(ctx context.Context, collection *mongo.Collection, filters ...Filter) ([]Observation, error) {
 
 	var observations []Observation
-	iter := q.Documents(ctx)
-	defer iter.Stop()
-	for {
-		doc, err := iter.Next()
-		if err == iterator.Done {
-			break
-		}
-		if err != nil {
-			// This could be an indexing error that we (developers) need to know about and add an index
-			// to firestore.
-			fmt.Println(err)
-			return observations, errors.Wrap(err, "fetching document in iteration")
-		}
+	opts := options.Find().SetSort(bson.D{{"resultTime", 1}})
+	cursor, err := collection.Find(context.TODO(), bson.D{{"name", "Bob"}}, opts)
+	if err != nil {
+		return observations, errors.Wrap(err, "fetching observations")
+	}
 
-		var observation Observation
-		if err := doc.DataTo(&observation); err != nil {
-			return observations, errors.Wrap(err, "parsing doc snapshot to observation")
-		}
-		observations = append(observations, observation)
+	if err = cursor.All(context.TODO(), &observations); err != nil {
+		return observations, errors.Wrap(err, "decoding observations")
 	}
 
 	return observations, nil

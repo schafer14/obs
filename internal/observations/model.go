@@ -4,6 +4,7 @@ import (
 	"time"
 
 	geojson "github.com/paulmach/go.geojson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 // NewObservation is an observation that has not yet been initalized.
@@ -36,7 +37,7 @@ type NewObservation struct {
 type Observation struct {
 
 	// Identity
-	ID string `json:"id"`
+	ID primitive.ObjectID `json:"id" bson:"_id,omitempty"`
 
 	// Metadata about the observation
 	PhenomenonTime      time.Time         `json:"phenomenonTime"`

@@ -72,7 +72,7 @@ func TestOptionalParamsMaybeProvided(t *testing.T) {
 	newObs.Process = observations.Referenceable{ID: "https://example.com/process", Label: "Process"}
 	newObs.Context = []string{"These are my contexts", "They are okay"}
 	newObs.Tags = map[string]string{"isCool": "true", "observed by": "Banner"}
-	newObs.Scale = "inches"
+	newObs.Scale = "cm"
 
 	// Act
 	obs, err := observations.New(newObs, id, now)

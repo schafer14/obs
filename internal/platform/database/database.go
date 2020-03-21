@@ -2,17 +2,30 @@ package database
 
 import (
 	"context"
+	"time"
 
-	"cloud.google.com/go/firestore"
 	"github.com/pkg/errors"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
 
-func Open(ctx context.Context, projectId string) (*firestore.Client, error) {
-	client, err := firestore.NewClient(ctx, projectId)
+// Open opens a connection to a mongo database
+func Open(ctx context.Context, connectionString string, database string) (*mongo.Database, error) {
+	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
+	defer cancel()
 
-	if err != nil {
-		return nil, errors.Wrap(err, "connecting to firestore")
-	}
+	client, err := mongo.Connect(ctx, options.Client().ApplyURI("mongodb://localhost:27017"))
 
-	return client, nil
+	return client.Database(database), errors.Wrap(err, "connecting to database")
+}
+
+// Check makes sure the db connection is responding.
+func Check(ctx context.Context, client *mongo.Client) error {
+	ctx, cancel := context.WithTimeout(ctx, 2*time.Second)
+	defer cancel()
+
+	err := client.Ping(ctx, readpref.Primary())
+
+	return errors.Wrap(err, "pinging database")
 }

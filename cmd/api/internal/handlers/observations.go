@@ -4,15 +4,15 @@ import (
 	"net/http"
 	"time"
 
-	"cloud.google.com/go/firestore"
 	"github.com/go-chi/chi"
-	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"github.com/schafer14/observations/internal/observations"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type ObservationHandler struct {
-	db *firestore.CollectionRef
+	db *mongo.Collection
 }
 
 // Create handles an http request that creates a new observation.
@@ -25,7 +25,7 @@ func (o *ObservationHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id := uuid.New().String()
+	id := primitive.NewObjectID()
 	now := time.Now()
 	obs, err := observations.New(newObs, id, now)
 	if err != nil {
