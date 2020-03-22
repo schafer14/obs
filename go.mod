@@ -9,12 +9,17 @@ require (
 	github.com/ardanlabs/service v0.0.0-20200319181906-0a79ac417756
 	github.com/davecgh/go-spew v1.1.1
 	github.com/go-chi/chi v4.0.3+incompatible
+	github.com/go-chi/cors v1.0.1
 	github.com/go-chi/docgen v1.0.5
 	github.com/go-playground/locales v0.13.0
 	github.com/go-playground/universal-translator v0.17.0
+	github.com/google/martian v2.1.0+incompatible
 	github.com/google/uuid v1.1.1
+	github.com/gorilla/context v1.1.1
+	github.com/gorilla/csrf v1.6.2
 	github.com/gorilla/sessions v1.2.0
 	github.com/jmoiron/sqlx v1.2.0
+	github.com/justinas/nosurf v1.1.0
 	github.com/paulmach/go.geojson v1.4.0
 	github.com/pkg/errors v0.9.1
 	github.com/pquerna/otp v1.2.0 // indirect

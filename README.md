@@ -46,9 +46,9 @@ go test ./... -v -project $MY_GCP_PROJECT
 - [x] Better validation errors observations
 - [x] Better validation and errors for filters
 - [x] Observation 404 errors
-- [ ] Authboss authentication
-- [ ] Authorization
+- [x] Authboss authentication
+- [ ] Authorization (Casbin)
 - [x] API docs and clients
 - [ ] Digital object observations
-- [ ] Firestore emulator for improved integration testing
 - [ ] Publish to a message queue when observations are created
+- [ ] SMTP mailer

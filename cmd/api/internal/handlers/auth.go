@@ -18,6 +18,7 @@ func (a *AuthHandler) CurrentlyLoggedIn(w http.ResponseWriter, r *http.Request) 
 	u, err := a.ab.CurrentUser(r)
 	if err != nil {
 		RespondError(ctx, w, errors.Wrap(err, "fetching current user"))
+		return
 	}
 
 	Respond(ctx, w, u, http.StatusOK)

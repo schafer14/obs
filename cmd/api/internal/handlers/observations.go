@@ -62,7 +62,7 @@ func (o *ObservationHandler) Get(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	obs, err := observations.Get(ctx, o.db, filters.Filters...)
+	obs, err := observations.Get(ctx, o.db)
 	if err != nil {
 		RespondError(ctx, w, errors.Wrap(err, "fetching observations"))
 		return

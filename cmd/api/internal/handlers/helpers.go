@@ -52,7 +52,8 @@ func Decode(r *http.Request, val interface{}) error {
 	decoder := json.NewDecoder(r.Body)
 	decoder.DisallowUnknownFields()
 	if err := decoder.Decode(val); err != nil {
-		return Error{errors.Wrap(err, "decoding request"), http.StatusUnprocessableEntity, []FieldError{}}
+
+		return Error{fmt.Errorf("Unable to process json request body"), http.StatusUnprocessableEntity, []FieldError{}}
 	}
 
 	if err := validate.Struct(val); err != nil {

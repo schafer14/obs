@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/ardanlabs/conf"
+	"github.com/go-chi/cors"
 	"github.com/gorilla/sessions"
 	"github.com/pkg/errors"
 	"github.com/schafer14/observations/cmd/api/internal/handlers"
@@ -47,7 +48,10 @@ func run() error {
 	// Read Configuration
 	// =============================================== //
 	var cfg struct {
-		APIHost  string `conf:"default:0.0.0.0:3000"`
+		APIHost string `conf:"default:0.0.0.0:3000"`
+		Cors    struct {
+			AllowedHosts []string `conf:"default:*"`
+		}
 		Database struct {
 			Uri         string `conf:"default:mongodb://localhost:27017"`
 			Name        string `conf:"default:observations"`
@@ -136,6 +140,17 @@ func run() error {
 	}
 
 	// =============================================== //
+	// Configure CORS
+	// =============================================== //
+	cors := cors.New(cors.Options{
+		AllowedOrigins:   cfg.Cors.AllowedHosts,
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+		AllowCredentials: true,
+		MaxAge:           300, // Maximum value not ignored by any of major browsers
+	})
+
+	// =============================================== //
 	// Starting API
 	// =============================================== //
 	log.Println("main : Started : Initializing API support")
@@ -145,7 +160,7 @@ func run() error {
 		People:       cfg.Database.Collections.People,
 	}
 
-	router := handlers.API(build, db, ab, collections)
+	router := handlers.API(build, db, ab, collections, cors)
 
 	http.ListenAndServe(cfg.APIHost, router)
 

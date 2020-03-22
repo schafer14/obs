@@ -8,7 +8,6 @@ import (
 	"github.com/volatiletech/authboss"
 	"github.com/volatiletech/authboss/otp/twofactor/totp2fa"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -19,7 +18,6 @@ type CollectionConfiguration struct {
 
 // User struct for authboss
 type User struct {
-	ID primitive.ObjectID `json:"id" bson:"_id,omitempty"`
 
 	// Non-authboss related field
 	Name string `json:"name"`
@@ -284,7 +282,7 @@ func (m Storer) Load(ctx context.Context, key string) (user authboss.User, err e
 
 // New user creation
 func (m Storer) New(_ context.Context) authboss.User {
-	return &User{ID: primitive.NewObjectID()}
+	return &User{}
 }
 
 // Create the user

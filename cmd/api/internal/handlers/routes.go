@@ -2,9 +2,12 @@ package handlers
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
+	"github.com/go-chi/cors"
+	"github.com/gorilla/context"
 	"github.com/volatiletech/authboss"
 	"github.com/volatiletech/authboss/confirm"
 	"github.com/volatiletech/authboss/expire"
@@ -18,15 +21,19 @@ type Collections struct {
 	People       string
 }
 
-func API(build string, db *mongo.Database, ab *authboss.Authboss, cfg Collections) chi.Router {
+func API(build string, db *mongo.Database, ab *authboss.Authboss, cfg Collections, corsMid *cors.Cors) chi.Router {
 	r := chi.NewRouter()
 
 	// Middleware
-	// TODO: add no CSRF
-	// TODO: add request throttling
+	r.Use(context.ClearHandler)
 	r.Use(middleware.RequestID)
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Logger)
+	r.Use(middleware.AllowContentType("application/json"))
+	r.Use(middleware.Throttle(50))
+	r.Use(corsMid.Handler)
+	r.Use(middleware.Timeout(time.Second))
+	r.Use(middleware.Compress(5))
 	r.Use(middleware.Recoverer)
 	r.Use(ab.LoadClientStateMiddleware)
 	r.Use(remember.Middleware(ab))
@@ -53,7 +60,7 @@ func API(build string, db *mongo.Database, ab *authboss.Authboss, cfg Collection
 		r.MethodFunc("GET", "/v1/me", authHandler.CurrentlyLoggedIn)
 
 		// Generic observation handler
-		r.Route("/v1//observations", func(r chi.Router) {
+		r.Route("/v1/observations", func(r chi.Router) {
 			r.Get("/", oHandler.Get)
 			r.Get("/{id}", oHandler.Find)
 			r.Post("/", oHandler.Create)

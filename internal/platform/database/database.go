@@ -12,7 +12,9 @@ import (
 
 // Open opens a connection to a mongo database
 func Open(ctx context.Context, connectionString string, database string) (*mongo.Database, error) {
-	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
+	// TODO: test this works.
+	// TODO: check options to pass.
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI("mongodb://localhost:27017"))

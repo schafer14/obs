@@ -16,8 +16,6 @@ var client *firestore.Client
 // TestMain prepares the test suite for integration tests.
 // It opens a connection to the database runs the tests and
 // cleans up the connection.
-//
-// TODO: run firestore locally for integration tests.
 func TestMain(m *testing.M) {
 	ctx := context.Background()
 

@@ -119,12 +119,15 @@ var queryOps map[string]string = map[string]string{
 	"=": "==", "in": "in",
 }
 
+// TODO: filter results
 // Get retrieves a list of observations from the databse.
 func Get(ctx context.Context, collection *mongo.Collection, filters ...Filter) ([]Observation, error) {
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
 
 	var observations []Observation
 	opts := options.Find().SetSort(bson.D{{"resultTime", 1}})
-	cursor, err := collection.Find(context.TODO(), bson.D{{"name", "Bob"}}, opts)
+	cursor, err := collection.Find(ctx, bson.D{{}}, opts)
 	if err != nil {
 		return observations, errors.Wrap(err, "fetching observations")
 	}
