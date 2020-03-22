@@ -12,8 +12,6 @@ import (
 
 // Open opens a connection to a mongo database
 func Open(ctx context.Context, connectionString string, database string) (*mongo.Database, error) {
-	// TODO: test this works.
-	// TODO: check options to pass.
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 

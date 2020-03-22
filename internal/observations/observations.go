@@ -119,7 +119,6 @@ var queryOps map[string]string = map[string]string{
 	"=": "==", "in": "in",
 }
 
-// TODO: filter results
 // Get retrieves a list of observations from the databse.
 func Get(ctx context.Context, collection *mongo.Collection, filters ...Filter) ([]Observation, error) {
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
@@ -132,7 +131,7 @@ func Get(ctx context.Context, collection *mongo.Collection, filters ...Filter) (
 		return observations, errors.Wrap(err, "fetching observations")
 	}
 
-	if err = cursor.All(context.TODO(), &observations); err != nil {
+	if err = cursor.All(ctx, &observations); err != nil {
 		return observations, errors.Wrap(err, "decoding observations")
 	}
 
