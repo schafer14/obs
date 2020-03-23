@@ -120,13 +120,26 @@ func (o *ObservationHandler) Generic(featureTypeSlug string) func(w http.Respons
 			return
 		}
 
-		if propertyType.Validator == nil {
-			Respond(ctx, w, fmt.Sprintf("This property type does not contain a validator. %v", propertyType.Name), http.StatusInternalServerError)
-			return
-		}
-
-		result, err := propertyType.Validator(r.Body)
+		result, err := definitions.Validate(r.Body, propertyType)
 		if err != nil {
+			if validationError, ok := err.(definitions.ValidationError); ok {
+				e := Error{
+					errors.New("Validation error"),
+					http.StatusUnprocessableEntity,
+					[]FieldError{},
+				}
+
+				for _, msg := range validationError.Fields {
+					e.Fields = append(e.Fields, FieldError{
+						Field: msg.Field(),
+						Error: msg.Description(),
+					})
+				}
+
+				Respond(ctx, w, e, http.StatusUnprocessableEntity)
+				return
+			}
+
 			Respond(ctx, w, err.Error(), http.StatusUnprocessableEntity)
 			return
 		}

@@ -27,6 +27,7 @@ require (
 	github.com/volatiletech/authboss v2.4.0+incompatible
 	github.com/volatiletech/authboss-clientstate v0.0.0-20190912194043-b5b6e0f4355e
 	github.com/volatiletech/authboss-renderer v0.0.0-20191129003553-2fd7168ab508
+	github.com/xeipuuv/gojsonschema v1.2.0
 	go.mongodb.org/mongo-driver v1.3.1
 	go.opencensus.io v0.22.3
 	google.golang.org/api v0.14.0
