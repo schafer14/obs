@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"reflect"
 	"strings"
@@ -49,7 +50,12 @@ func init() {
 //
 // If the provided value is a struct then it is checked for validation tags.
 func Decode(r *http.Request, val interface{}) error {
-	decoder := json.NewDecoder(r.Body)
+	return DecodeAny(r.Body, val)
+}
+
+// DecodeAny decodes any io reader
+func DecodeAny(r io.Reader, val interface{}) error {
+	decoder := json.NewDecoder(r)
 	decoder.DisallowUnknownFields()
 	if err := decoder.Decode(val); err != nil {
 

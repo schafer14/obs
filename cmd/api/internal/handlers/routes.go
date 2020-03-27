@@ -21,7 +21,7 @@ type Collections struct {
 	People       string
 }
 
-func API(build string, db *mongo.Database, ab *authboss.Authboss, cfg Collections, corsMid *cors.Cors) chi.Router {
+func API(build string, db *mongo.Database, ab *authboss.Authboss, cfg Collections, corsMid *cors.Cors, version string) chi.Router {
 	r := chi.NewRouter()
 
 	// Middleware
@@ -43,7 +43,7 @@ func API(build string, db *mongo.Database, ab *authboss.Authboss, cfg Collection
 	personColl := db.Collection(cfg.People)
 	// Define handlers
 	authHandler := AuthHandler{ab}
-	checkHandler := Check{build, db}
+	checkHandler := Check{build, db, version}
 	oHandler := &ObservationHandler{obsColl}
 	personHandler := &PersonHandler{personColl}
 
@@ -91,6 +91,9 @@ func API(build string, db *mongo.Database, ab *authboss.Authboss, cfg Collection
 
 	// Health Check
 	r.Get("/health", checkHandler.Health)
+	r.Get("/v1/health", checkHandler.Health)
+	r.Get("/version", checkHandler.Version)
+	r.Get("/v1/version", checkHandler.Version)
 
 	// Definitions route
 	r.Get("/v1/definitions", GetDefinitions)

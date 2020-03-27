@@ -7,6 +7,7 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/xeipuuv/gojsonschema"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 var (
@@ -27,7 +28,7 @@ func (v ValidationError) Error() string {
 // Validate takes an io reader. Reads the content into JSON
 // and validates that json against a Property Type and returns
 // en error if the validation fails.
-func Validate(r io.Reader, propertyType PropertyType) (interface{}, error) {
+func Validate(r io.Reader, propertyType PropertyType) (bson.M, error) {
 	if propertyType.Schema == nil && propertyType.SchemaURL == "" {
 		return nil, ErrorNoValidatorFound
 	}
@@ -42,7 +43,7 @@ func Validate(r io.Reader, propertyType PropertyType) (interface{}, error) {
 
 	// Read body into an interface.
 	decoder := json.NewDecoder(r)
-	var requestBody interface{}
+	var requestBody bson.M
 	err := decoder.Decode(&requestBody)
 	if err != nil {
 		return nil, ErrorParsingRequestBody

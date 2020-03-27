@@ -2,11 +2,12 @@ package observations
 
 import (
 	"context"
+	"fmt"
+	"strings"
 	"time"
 
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"gopkg.in/go-playground/validator.v9"
@@ -16,7 +17,7 @@ import (
 var validate = validator.New()
 
 // New creates a new Observation from a NewObservation
-func New(newObs NewObservation, id primitive.ObjectID, now time.Time) (Observation, error) {
+func New(newObs NewObservation, id string, now time.Time) (Observation, error) {
 	phenomenonTime, startTime, resultTime := now, now, now
 
 	// Set times to now if they are not provided.
@@ -90,13 +91,8 @@ func Find(ctx context.Context, collection *mongo.Collection, id string) (Observa
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
-	oid, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		return Observation{}, errors.Wrap(err, "parsing id")
-	}
-
 	var obs Observation
-	err = collection.FindOne(ctx, bson.D{{"_id", oid}}).Decode(&obs)
+	err := collection.FindOne(ctx, bson.D{{"id", id}}).Decode(&obs)
 	if err != nil {
 		return obs, errors.Wrap(err, "finding observation")
 	}
@@ -110,23 +106,19 @@ type Filter struct {
 	Matcher string `json:"match" validate:"required"`
 }
 
-var filterableFields map[string]string = map[string]string{
-	"featureId": "FeatureID", "featureTypeId": "FeatureTypeID", "propertyId": "PropertyID",
-	"propertyTypeId": "PropertyTypeID", "processId": "ProcessID", "id": "ID",
-}
-
-var queryOps map[string]string = map[string]string{
-	"=": "==", "in": "in",
-}
-
 // Get retrieves a list of observations from the databse.
 func Get(ctx context.Context, collection *mongo.Collection, filters ...Filter) ([]Observation, error) {
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
+	mongoFilter := []bson.E{}
+	for _, filter := range filters {
+		mongoFilter = append(mongoFilter, buildFilter(filter))
+	}
+
 	var observations []Observation
 	opts := options.Find().SetSort(bson.D{{"resultTime", 1}})
-	cursor, err := collection.Find(ctx, bson.D{{}}, opts)
+	cursor, err := collection.Find(ctx, mongoFilter, opts)
 	if err != nil {
 		return observations, errors.Wrap(err, "fetching observations")
 	}
@@ -136,4 +128,16 @@ func Get(ctx context.Context, collection *mongo.Collection, filters ...Filter) (
 	}
 
 	return observations, nil
+}
+
+func buildFilter(f Filter) bson.E {
+	switch f.Op {
+	case "=":
+		return bson.E{Key: strings.ToLower(f.Path), Value: f.Matcher}
+	case "in":
+		return bson.E{Key: strings.ToLower(f.Path), Value: bson.M{"$in": strings.Split(f.Matcher, ",")}}
+	default:
+		fmt.Printf("Cannot filter with operation %v\n", f.Op)
+		return bson.E{}
+	}
 }

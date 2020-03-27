@@ -3,13 +3,14 @@ package handlers
 import (
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/go-chi/chi"
+	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"github.com/schafer14/observations/internal/definitions"
 	"github.com/schafer14/observations/internal/observations"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -27,7 +28,7 @@ func (o *ObservationHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id := primitive.NewObjectID()
+	id := uuid.New().String()
 	now := time.Now()
 	obs, err := observations.New(newObs, id, now)
 	if err != nil {
@@ -48,7 +49,7 @@ func (o *ObservationHandler) Create(w http.ResponseWriter, r *http.Request) {
 	Respond(ctx, w, obs, http.StatusCreated)
 }
 
-type Filters struct {
+type SearchParams struct {
 	Filters []observations.Filter `json:"filters" validate:"omitempty,dive"`
 }
 
@@ -56,13 +57,14 @@ type Filters struct {
 func (o *ObservationHandler) Get(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	var filters Filters
-	if err := Decode(r, &filters); err != nil && r.ContentLength > 0 {
+	var filters SearchParams
+	qs := r.URL.Query().Get("q")
+	if err := DecodeAny(strings.NewReader(qs), &filters); err != nil && r.ContentLength > 0 {
 		RespondError(ctx, w, err)
 		return
 	}
 
-	obs, err := observations.Get(ctx, o.db)
+	obs, err := observations.Get(ctx, o.db, filters.Filters...)
 	if err != nil {
 		RespondError(ctx, w, errors.Wrap(err, "fetching observations"))
 		return
@@ -155,7 +157,7 @@ func (o *ObservationHandler) Generic(featureTypeSlug string) func(w http.Respons
 			Result: result,
 		}
 
-		id := primitive.NewObjectID()
+		id := uuid.New().String()
 		now := time.Now()
 		obs, err := observations.New(newObs, id, now)
 		if err != nil {

@@ -296,6 +296,15 @@ var Data = map[string]FeatureType{
 				Description:   "The sense of belonging the group members feel to the group (from the book Culture Code)",
 				PropertyTypes: map[string]PropertyType{},
 			},
+			"closeness": Property{
+				ID:          "57f62e37-77dc-4712-ab17-156f31d1ea5e",
+				Name:        "Closeness",
+				Slug:        "closeness",
+				Description: "The sense of closenes the group members feel to the group (from the book Culture Code)",
+				PropertyTypes: map[string]PropertyType{
+					"experimental-generation-of-interpersonal-closeness": PropertyType{},
+				},
+			},
 		},
 	},
 }

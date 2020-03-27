@@ -20,6 +20,10 @@ github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym
 github.com/DATA-DOG/go-sqlmock v1.3.3/go.mod h1:f/Ixk793poVmq4qj/V1dPUg2JEAKC73Q5eFN3EC/SaM=
 github.com/Shopify/sarama v1.19.0/go.mod h1:FVkBWblsNy7DGZRfXLU0O9RCGt5g3g3yEuWXgklEdEo=
 github.com/Shopify/toxiproxy v2.1.4+incompatible/go.mod h1:OXgGpZ6Cli1/URJOF1DMxUHB2q5Ap20/P/eIdh4G0pI=
+github.com/adams-sarah/prettytest v0.0.0-20150503061827-2880862ae7f5 h1:Asp4eRWQ0c1fqnY5+sTndqAjp/LCsmOy8wozEJLaNQs=
+github.com/adams-sarah/prettytest v0.0.0-20150503061827-2880862ae7f5/go.mod h1:p2ev/QMGYqQo5byMwvkLP4vnZdCJYlFHwhmCII3aj3E=
+github.com/adams-sarah/test2doc v0.0.0-20180225015401-dfbef56b3eab h1:YSTLDIv9PQqwmBNLl2ykLQAf6K6kh1W67coOv1ogcms=
+github.com/adams-sarah/test2doc v0.0.0-20180225015401-dfbef56b3eab/go.mod h1:8IxGih/WyDCpFZyIxbpfva0HWbbujM+6wxTTHpJQlX4=
 github.com/arangodb/go-driver v0.0.0-20200312132526-559d6abd4d10 h1:Y8+8ZT9pdxMv4/Qe2DBrw5Kd9MKc77Of0xzKInwA2kw=
 github.com/arangodb/go-driver v0.0.0-20200312132526-559d6abd4d10/go.mod h1:zwIyITtzH8pltwhR5eDthDZlON7UJ4Nh16c7CcgOmj0=
 github.com/arangodb/go-velocypack v0.0.0-20190129082528-7896a965b4ad h1:Ah+VRYUWLuqgbfnDyuC8IrIe8XFzpt9tBVVnPGFNTJ8=
@@ -124,6 +128,7 @@ github.com/gorilla/context v1.1.1 h1:AWwleXJkX/nhcU9bZSnZoi3h/qGYqQAGhq6zZe/aQW8
 github.com/gorilla/context v1.1.1/go.mod h1:kBGZzfjB9CEq2AlWe17Uuf7NDRt0dE0s8S51q0aT7Yg=
 github.com/gorilla/csrf v1.6.2 h1:QqQ/OWwuFp4jMKgBFAzJVW3FMULdyUW7JoM4pEWuqKg=
 github.com/gorilla/csrf v1.6.2/go.mod h1:7tSf8kmjNYr7IWDCYhd3U8Ck34iQ/Yw5CJu7bAkHEGI=
+github.com/gorilla/mux v1.6.2 h1:Pgr17XVTNXAk3q/r4CpKzC5xBM/qW1uVLV+IhRZpIIk=
 github.com/gorilla/mux v1.6.2/go.mod h1:1lud6UwP+6orDFRuTfBEV8e9/aOM/c4fVVCaMa2zaAs=
 github.com/gorilla/securecookie v1.1.1 h1:miw7JPhV+b/lAHSXz4qd/nN9jRiAFV5FwjeKyCS8BvQ=
 github.com/gorilla/securecookie v1.1.1/go.mod h1:ra0sb63/xPlUeL+yeDciTfxMRAA+MP+HVt/4epWDjd4=
@@ -138,6 +143,8 @@ github.com/jmoiron/sqlx v1.2.0 h1:41Ip0zITnmWNR/vHV+S4m+VoUivnWY5E4OJfLZjCJMA=
 github.com/jmoiron/sqlx v1.2.0/go.mod h1:1FEQNm3xlJgrMD+FBdI9+xvCksHtbpVBBw5dYhBSsks=
 github.com/joho/godotenv v1.3.0/go.mod h1:7hK45KPybAkOC6peb+G5yklZfMxEjkZhHbwpqxOKXbg=
 github.com/jstemmer/go-junit-report v0.0.0-20190106144839-af01ea7f8024/go.mod h1:6v2b51hI/fHJwM22ozAgKL4VKDeJcHhJFhtBdhmNjmU=
+github.com/julienschmidt/httprouter v1.3.0 h1:U0609e9tgbseu3rBINet9P48AI/D3oJs4dN7jwJOQ1U=
+github.com/julienschmidt/httprouter v1.3.0/go.mod h1:JR6WtHb+2LUe8TCKY3cZOxFyyO8IZAc4RVcycCCAKdM=
 github.com/justinas/nosurf v1.1.0 h1:qqV6FJmnDBJ6F9pOzhZgZitAZWBYonMOXglof7TtdZw=
 github.com/justinas/nosurf v1.1.0/go.mod h1:ALpWdSbuNGy2lZWtyXdjkYv4edL23oSEgfBT1gPJ5BQ=
 github.com/karrick/godirwalk v1.8.0/go.mod h1:H5KPZjojv4lE+QYImBI8xVtrBRgYrIVsaRPx4tDPEn4=

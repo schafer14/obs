@@ -33,6 +33,7 @@ import (
 )
 
 var build = "develop"
+var version = "v0.0.1"
 
 func main() {
 	if err := run(); err != nil {
@@ -160,7 +161,7 @@ func run() error {
 		People:       cfg.Database.Collections.People,
 	}
 
-	router := handlers.API(build, db, ab, collections, cors)
+	router := handlers.API(build, db, ab, collections, cors, version)
 
 	http.ListenAndServe(cfg.APIHost, router)
 

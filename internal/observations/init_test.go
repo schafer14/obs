@@ -1,47 +1,32 @@
 package observations_test
 
 import (
-	"context"
 	"flag"
-	"fmt"
 	"os"
 	"testing"
 
-	"cloud.google.com/go/firestore"
+	"github.com/schafer14/observations/internal/tests"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
-var coll *firestore.CollectionRef
-var client *firestore.Client
+var coll *mongo.Collection
 
-// TestMain prepares the test suite for integration tests.
-// It opens a connection to the database runs the tests and
-// cleans up the connection.
+// TestMain runs a database for this package.
 func TestMain(m *testing.M) {
-	ctx := context.Background()
-
-	var project = flag.String("project", "linked-data-land", "the google project the firestore instance is in.")
+	t := &testing.T{}
 
 	flag.Parse()
-
-	// Setup
+	var c *tests.Container
 	if !testing.Short() {
-		c, err := firestore.NewClient(ctx, *project)
-		client = c
-		if err != nil {
-			fmt.Printf("connecting to firestore client: %v", err)
-			os.Exit(1)
-		}
-		coll = client.Collection("observations_test")
+		c = tests.SetupDatabase(t)
+		db := tests.DatabaseTest(t, c)
+		coll = db.Collection("observations")
 	}
 
-	// Run
 	result := m.Run()
 
-	// Teardown
 	if !testing.Short() {
-		if client != nil {
-			client.Close()
-		}
+		tests.TeardownDatabase(t, c)
 	}
 	os.Exit(result)
 }

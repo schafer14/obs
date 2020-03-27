@@ -4,6 +4,8 @@ go 1.13
 
 require (
 	cloud.google.com/go/firestore v1.1.1
+	github.com/adams-sarah/prettytest v0.0.0-20150503061827-2880862ae7f5 // indirect
+	github.com/adams-sarah/test2doc v0.0.0-20180225015401-dfbef56b3eab
 	github.com/arangodb/go-driver v0.0.0-20200312132526-559d6abd4d10
 	github.com/ardanlabs/conf v1.2.1
 	github.com/ardanlabs/service v0.0.0-20200319181906-0a79ac417756
@@ -17,8 +19,10 @@ require (
 	github.com/google/uuid v1.1.1
 	github.com/gorilla/context v1.1.1
 	github.com/gorilla/csrf v1.6.2
+	github.com/gorilla/mux v1.6.2
 	github.com/gorilla/sessions v1.2.0
 	github.com/jmoiron/sqlx v1.2.0
+	github.com/julienschmidt/httprouter v1.3.0 // indirect
 	github.com/justinas/nosurf v1.1.0
 	github.com/paulmach/go.geojson v1.4.0
 	github.com/pkg/errors v0.9.1

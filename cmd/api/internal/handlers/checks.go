@@ -9,8 +9,9 @@ import (
 
 // Check provides support for orchestration health checks.
 type Check struct {
-	build string
-	db    *mongo.Database
+	build   string
+	db      *mongo.Database
+	version string
 }
 
 // Health validates the service is healthy and ready to accept requests.
@@ -19,10 +20,12 @@ func (c *Check) Health(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	health := struct {
-		Version string `json:"version"`
+		Build   string `json:"build"`
 		Status  string `json:"status"`
+		Version string `json:"version"`
 	}{
-		Version: c.build,
+		Build:   c.build,
+		Version: c.version,
 	}
 
 	// Check if the database is ready.
@@ -37,6 +40,23 @@ func (c *Check) Health(w http.ResponseWriter, r *http.Request) {
 	}
 
 	health.Status = "ok"
+	Respond(ctx, w, health, http.StatusOK)
+	return
+}
+
+// Version returns version informatino
+func (c *Check) Version(w http.ResponseWriter, r *http.Request) {
+
+	ctx := r.Context()
+
+	health := struct {
+		Build   string `json:"build"`
+		Version string `json:"version"`
+	}{
+		Build:   c.build,
+		Version: c.version,
+	}
+
 	Respond(ctx, w, health, http.StatusOK)
 	return
 }

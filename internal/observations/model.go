@@ -4,7 +4,7 @@ import (
 	"time"
 
 	geojson "github.com/paulmach/go.geojson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 // NewObservation is an observation that has not yet been initalized.
@@ -29,15 +29,15 @@ type NewObservation struct {
 	Tags    map[string]string `json:"tags,omitempty" validate:"-"`
 	Context []string          `json:"context,omitempty" validate:"-"`
 
-	Result interface{} `json:"result" validate:"required"`
-	Scale  string      `json:"scale,omitempty" validate:"-"`
+	Result bson.M `json:"result" validate:"required"`
+	Scale  string `json:"scale,omitempty" validate:"-"`
 }
 
 // Observation is an observation that can be persisted to a database.
 type Observation struct {
 
 	// Identity
-	ID primitive.ObjectID `json:"id" bson:"_id,omitempty"`
+	ID string `json:"id"`
 
 	// Metadata about the observation
 	PhenomenonTime      time.Time         `json:"phenomenonTime"`
@@ -63,8 +63,8 @@ type Observation struct {
 	Tags    map[string]string `json:"tags,omitempty"`
 	Context []string          `json:"context,omitempty"`
 
-	Result interface{} `json:"result"`
-	Scale  string      `json:"scale,omitempty"`
+	Result bson.M `json:"result"`
+	Scale  string `json:"scale,omitempty"`
 }
 
 // Referenceable field is a field that can be looked up with an ID and additionally has a human
