@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/schafer14/observations/internal/platform/database"
+	"github.com/schafer14/obs/internal/platform/database"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 

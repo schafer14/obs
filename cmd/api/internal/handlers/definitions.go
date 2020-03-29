@@ -3,7 +3,7 @@ package handlers
 import (
 	"net/http"
 
-	"github.com/schafer14/observations/internal/definitions"
+	"github.com/schafer14/obs/internal/definitions"
 )
 
 func GetDefinitions(w http.ResponseWriter, r *http.Request) {

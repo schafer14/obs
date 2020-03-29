@@ -9,8 +9,8 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
-	"github.com/schafer14/observations/internal/definitions"
-	"github.com/schafer14/observations/internal/observations"
+	"github.com/schafer14/obs/internal/definitions"
+	"github.com/schafer14/obs/internal/observations"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
