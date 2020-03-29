@@ -1,4 +1,4 @@
-module github.com/schafer14/observations
+module github.com/schafer14/obs
 
 go 1.13
 

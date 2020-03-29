@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/schafer14/observations/internal/tests"
+	"github.com/schafer14/obs/internal/tests"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 

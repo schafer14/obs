@@ -9,7 +9,7 @@ import (
 	"github.com/google/uuid"
 	geojson "github.com/paulmach/go.geojson"
 	"github.com/pkg/errors"
-	"github.com/schafer14/observations/internal/observations"
+	"github.com/schafer14/obs/internal/observations"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.mongodb.org/mongo-driver/mongo"
