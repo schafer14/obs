@@ -2,6 +2,7 @@ package observations_test
 
 import (
 	"flag"
+	"fmt"
 	"os"
 	"testing"
 
@@ -19,7 +20,11 @@ func TestMain(m *testing.M) {
 	var c *tests.Container
 	if !testing.Short() {
 		c = tests.SetupDatabase(t)
-		db := tests.DatabaseTest(t, c)
+		db, err := tests.DatabaseTest(t, c)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
 		coll = db.Collection("observations")
 	}
 

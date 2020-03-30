@@ -4,10 +4,12 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"os/exec"
 	"testing"
 	"time"
 
+	"github.com/pkg/errors"
 	"github.com/schafer14/obs/internal/platform/database"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -18,12 +20,13 @@ type Container struct {
 	Host string // IP:Port
 }
 
-func DatabaseTest(t *testing.T, c *Container) *mongo.Database {
+func DatabaseTest(t *testing.T, c *Container) (*mongo.Database, error) {
 	t.Helper()
 
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+	defer cancel()
 
-	maxAttempts := 20
+	maxAttempts := 30
 	var db *mongo.Database
 	for attempts := 1; attempts <= maxAttempts; attempts++ {
 		dbTry, err := database.Open(ctx, c.Host, "observations")
@@ -33,12 +36,13 @@ func DatabaseTest(t *testing.T, c *Container) *mongo.Database {
 			break
 		}
 		if err != nil && attempts == maxAttempts {
-			t.Fatalf("opening database connection: %v", err)
+			return nil, errors.Wrap(err, "opening database connection")
 		}
 		time.Sleep(time.Second)
 	}
 
 	t.Log("waiting for database to be ready")
+	fmt.Println("db", db, db.Client())
 
 	// Wait for the database to be ready. Wait 100ms longer between each attempt.
 	// Do not try more than 20 times.
@@ -48,23 +52,23 @@ func DatabaseTest(t *testing.T, c *Container) *mongo.Database {
 		if pingError == nil {
 			break
 		}
-		time.Sleep(time.Duration(attempts) * 100 * time.Millisecond)
+		time.Sleep(time.Second)
 	}
 
 	if pingError != nil {
 		dumpContainerLogs(t, c)
 		TeardownDatabase(t, c)
-		t.Fatalf("waiting for database to be ready: %v", pingError)
+		return nil, errors.Wrap(pingError, "waiting for database to be ready")
 	}
 
-	return db
+	return db, nil
 }
 
 // StartContainer runs a postgres container to execute commands.
 func SetupDatabase(t *testing.T) *Container {
 	t.Helper()
 
-	cmd := exec.Command("docker", "run", "-P", "-d", "mongo:4-bionic")
+	cmd := exec.Command("docker", "run", "-P", "-d", "circleci/mongo:4.0")
 	var out bytes.Buffer
 	cmd.Stdout = &out
 	if err := cmd.Run(); err != nil {
@@ -72,7 +76,6 @@ func SetupDatabase(t *testing.T) *Container {
 	}
 
 	id := out.String()[:12]
-	t.Log("DB ContainerID:", id)
 
 	cmd = exec.Command("docker", "inspect", id)
 	out.Reset()
@@ -112,11 +115,13 @@ func TeardownDatabase(t *testing.T, c *Container) {
 	t.Helper()
 
 	if err := exec.Command("docker", "stop", c.ID).Run(); err != nil {
+		fmt.Println("could not stop container")
 		t.Fatalf("could not stop container: %v", err)
 	}
 	t.Log("Stopped:", c.ID)
 
 	if err := exec.Command("docker", "rm", c.ID, "-v").Run(); err != nil {
+		fmt.Println("could not remove container")
 		t.Fatalf("could not remove container: %v", err)
 	}
 	t.Log("Removed:", c.ID)
@@ -128,7 +133,8 @@ func dumpContainerLogs(t *testing.T, c *Container) {
 
 	out, err := exec.Command("docker", "logs", c.ID).CombinedOutput()
 	if err != nil {
-		t.Fatalf("could not log container: %v", err)
+
+		fmt.Printf("could not log container: %v/n", err)
 	}
 	t.Logf("Logs for %s\n%s:", c.ID, out)
 }

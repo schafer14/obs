@@ -1,7 +1,7 @@
 version: 2
 jobs:
  build:
-   machine:
+   machine: 
      image: ubuntu-1604:201903-01
    steps:
      - checkout
@@ -18,7 +18,7 @@ jobs:
          name: Run unit tests
          command: |
              go test -v ./... --short
-     - run:
-         name: Run integration tests
-         command: |
-             go test -v ./...
+     # - run:
+     #     name: Run integration tests
+     #     command: |
+     #         go test -v ./...
