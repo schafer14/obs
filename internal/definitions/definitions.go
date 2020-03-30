@@ -19,9 +19,38 @@ var Data = map[string]FeatureType{
 				Name:        "Profession",
 				Slug:        "profession",
 				Description: "Observations about persons career, skills and profession.",
-				Category:    "optimism",
 				PropertyTypes: map[string]PropertyType{
-					"role": PropertyType{},
+					"role": PropertyType{
+						ID:          "01e5a495-d715-4ab7-b62c-8841e02c542c",
+						Slug:        "role",
+						Name:        "Role",
+						Description: "A perons role in an organisation",
+						Schema: map[string]interface{}{
+							"$schema":              "http://json-schema.org/draft-07/schema",
+							"$id":                  "https://linked-data-land.appspot.com/v1/definitions/people/profession/role",
+							"additionalProperties": false,
+							"type":                 "object",
+							"title":                "Role",
+							"description":          "A persons role in an organisation",
+							"required": []string{
+								"role",
+								"org",
+							},
+							"properties": map[string]interface{}{
+								"role": map[string]interface{}{
+									"$id":         "#/properties/role",
+									"type":        "string",
+									"title":       "The role",
+									"description": "The role.",
+								},
+								"org": map[string]interface{}{
+									"$id":   "#/properties/org",
+									"type":  "string",
+									"title": "Organisation",
+								},
+							},
+						},
+					},
 				},
 			},
 			"optimism": Property{
@@ -31,9 +60,74 @@ var Data = map[string]FeatureType{
 				Description: "A persons optimism",
 				Category:    "optimism",
 				PropertyTypes: map[string]PropertyType{
-					"learned-optimism":     PropertyType{},
-					"learned-optimism-raw": PropertyType{},
-					"cave":                 PropertyType{},
+					"learned-optimism": PropertyType{
+						ID:          "ce90ef00-fcad-4ca4-becb-9be828ab355b",
+						Slug:        "learned-optimism",
+						Name:        "Learned Optimism Test",
+						Description: "Test results in the style described in Learned Optimism 3",
+						Schema: map[string]interface{}{
+							"$schema":              "http://json-schema.org/draft-07/schema",
+							"$id":                  "https://linked-data-land.appspot.com/v1/definitions/people/optimism/learned-optimism",
+							"additionalProperties": false,
+							"type":                 "object",
+							"title":                "Optimism",
+							"description":          "Results of an optimism test.",
+							"required": []string{
+								"PmB",
+								"PmG",
+								"PvB",
+								"PvG",
+								"HoB",
+								"PsB",
+								"PsG",
+								"totalB",
+								"totalG",
+								"optimism",
+							},
+							"properties": map[string]interface{}{
+								"PmB": map[string]interface{}{
+									"type":  "number",
+									"title": "Permenance Bad",
+								},
+								"PmG": map[string]interface{}{
+									"type":  "number",
+									"title": "Permenance Good",
+								},
+								"PvG": map[string]interface{}{
+									"type":  "number",
+									"title": "Pervasiveness Good",
+								},
+								"PvB": map[string]interface{}{
+									"type":  "number",
+									"title": "Pervasiveness Bad",
+								},
+								"HoB": map[string]interface{}{
+									"type":  "number",
+									"title": "Hope",
+								},
+								"PsB": map[string]interface{}{
+									"type":  "number",
+									"title": "Personalization Bad",
+								},
+								"PsG": map[string]interface{}{
+									"type":  "number",
+									"title": "Personalization Good",
+								},
+								"totalG": map[string]interface{}{
+									"type":  "number",
+									"title": "Total Good",
+								},
+								"totalB": map[string]interface{}{
+									"type":  "number",
+									"title": "Total Bad",
+								},
+								"optimism": map[string]interface{}{
+									"type":  "number",
+									"title": "Optimism",
+								},
+							},
+						},
+					},
 				},
 			},
 			"depression": Property{
@@ -43,8 +137,28 @@ var Data = map[string]FeatureType{
 				Description: "A persons depression",
 				Category:    "optimism",
 				PropertyTypes: map[string]PropertyType{
-					"learned-optimism":     PropertyType{},
-					"learned-optimism-raw": PropertyType{},
+					"learned-optimism": PropertyType{
+						ID:   "847cd978-b57c-40c9-9dba-ba46cd6d11ab",
+						Name: "Depression as described in Learned Optimism",
+						Slug: "learned-optimism",
+						Schema: map[string]interface{}{
+							"$schema":              "http://json-schema.org/draft-07/schema",
+							"$id":                  "https://linked-data-land.appspot.com/v1/definitions/people/depression/learned-optimism",
+							"additionalProperties": false,
+							"type":                 "object",
+							"title":                "Depression",
+							"description":          "Depression measured as described in learned optimism",
+							"required": []string{
+								"depression",
+							},
+							"properties": map[string]interface{}{
+								"depression": map[string]interface{}{
+									"type":  "number",
+									"title": "Depression",
+								},
+							},
+						},
+					},
 				},
 			},
 			"goal": Property{
@@ -270,8 +384,28 @@ var Data = map[string]FeatureType{
 				Description: "A persons personality",
 				Category:    "personality",
 				PropertyTypes: map[string]PropertyType{
-					"sixteen-and-me": PropertyType{},
-					"myers-briggs":   PropertyType{},
+					"sixteen-and-me": PropertyType{
+						ID:   "96c6c848-9a2f-4283-aa56-b676929e1dc1",
+						Name: "Sixteen and Me Personality",
+						Slug: "sixteen-and-me",
+						Schema: map[string]interface{}{
+							"$schema":              "http://json-schema.org/draft-07/schema",
+							"$id":                  "https://linked-data-land.appspot.com/v1/definitions/people/personality/sixteen-and-me",
+							"additionalProperties": false,
+							"type":                 "object",
+							"title":                "Personality",
+							"description":          "Personality result from Sixteen and Me (result only)",
+							"required": []string{
+								"personality",
+							},
+							"properties": map[string]interface{}{
+								"personality": map[string]interface{}{
+									"type":  "string",
+									"title": "Personality",
+								},
+							},
+						},
+					},
 				},
 			},
 		},
